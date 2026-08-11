@@ -1,0 +1,8 @@
+paddleocr
+paddlepaddle
+sentence-transformers
+qdrant-client
+langchain
+langchain-ollama
+pypdf
+python-dotenv
