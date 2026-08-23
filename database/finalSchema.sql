@@ -121,9 +121,53 @@ CREATE TABLE policies (
         UNIQUE (organization_id, name, version)
 );
 
+-- ============================================================
+-- 4. POLICY RULES
+-- ============================================================
+-- Structured rules extracted from company policy documents.
+--
+-- Example:
+--   LEAVE_DURATION
+--   GREATER_THAN
+--   3
+--   CONSECUTIVE_DAYS
+--   MANAGER_APPROVAL_REQUIRED
+--
+-- The AI rule extractor creates these values from the
+-- organization's policy document.
+-- ============================================================
+
+CREATE TABLE policy_rules (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+
+    policy_id BIGINT NOT NULL,
+
+    rule_type VARCHAR(100) NOT NULL,
+
+    condition VARCHAR(50),
+
+    value NUMERIC,
+
+    unit VARCHAR(100),
+
+    action VARCHAR(100),
+
+    metadata JSONB,
+
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_policy_rules_policy
+        FOREIGN KEY (policy_id)
+        REFERENCES policies(id)
+        ON DELETE CASCADE
+);
+
+
+CREATE INDEX idx_policy_rules_policy
+ON policy_rules(policy_id);
 
 -- ============================================================
--- 4. TASKS
+-- 5. TASKS
 -- ============================================================
 -- Employee tasks.
 --
@@ -170,7 +214,7 @@ CREATE TABLE tasks (
 
 
 -- ============================================================
--- 5. SUBMISSIONS
+-- 6. SUBMISSIONS
 -- ============================================================
 -- Employee document submissions.
 --
@@ -225,7 +269,7 @@ CREATE TABLE submissions (
 
 
 -- ============================================================
--- 6. REVIEWS
+-- 7. REVIEWS
 -- ============================================================
 -- Stores every AI review performed on a submission.
 --
@@ -281,7 +325,7 @@ CREATE TABLE reviews (
 
 
 -- ============================================================
--- 7. REVIEW CITATIONS
+-- 8. REVIEW CITATIONS
 -- ============================================================
 -- Stores policy evidence used by an AI review.
 --
@@ -315,7 +359,7 @@ CREATE TABLE review_citations (
 
 
 -- ============================================================
--- 8. APPROVALS
+-- 9. APPROVALS
 -- ============================================================
 -- Human approval is separate from AI review.
 --
@@ -368,7 +412,7 @@ CREATE TABLE approvals (
 
 
 -- ============================================================
--- 9. AUDIT LOGS
+-- 10. AUDIT LOGS
 -- ============================================================
 -- Records important actions performed in the system.
 --
@@ -417,7 +461,7 @@ CREATE TABLE audit_logs (
 
 
 -- ============================================================
--- 10. EMPLOYMENT RECORDS
+-- 11. EMPLOYMENT RECORDS
 -- ============================================================
 -- Stores an employee's employment history.
 --
@@ -482,7 +526,7 @@ WHERE status = 'CURRENT';
 
 
 -- ============================================================
--- 11. PERSONAL PROFILES
+-- 12. PERSONAL PROFILES
 -- ============================================================
 -- Employee-owned personal profile.
 --
@@ -512,7 +556,7 @@ CREATE TABLE personal_profiles (
 
 
 -- ============================================================
--- 12. SKILLS
+-- 13. SKILLS
 -- ============================================================
 -- Master list of skills.
 --
@@ -533,7 +577,7 @@ CREATE TABLE skills (
 
 
 -- ============================================================
--- 13. USER SKILLS
+-- 14. USER SKILLS
 -- ============================================================
 -- Connects a user to a skill.
 --
@@ -590,7 +634,7 @@ CREATE TABLE user_skills (
 
 
 -- ============================================================
--- 14. ACHIEVEMENTS
+-- 15. ACHIEVEMENTS
 -- ============================================================
 -- Career achievements.
 --
@@ -644,7 +688,7 @@ CREATE TABLE achievements (
 
 
 -- ============================================================
--- 15. PROMOTIONS
+-- 16. PROMOTIONS
 -- ============================================================
 -- Stores career progression within an organization.
 --
@@ -695,7 +739,7 @@ CREATE TABLE promotions (
 
 
 -- ============================================================
--- 16. PROFILE SHARES
+-- 17. PROFILE SHARES
 -- ============================================================
 -- Stores shareable professional profile links.
 --
