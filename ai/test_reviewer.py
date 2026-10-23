@@ -1,25 +1,31 @@
+from pathlib import Path
+
+from app.loaders import load_document
 from app.reviewer import review_document
 
 
-document = """
-Employee: Rahul Sharma
+submission_path = Path("test_data/test_leave_request.txt")
 
-Leave Request:
-I would like to take 5 consecutive days of annual leave
-from August 18, 2026 to August 22, 2026.
+document_text = load_document(str(submission_path))
 
-Request submitted on August 14, 2026.
-"""
+result = review_document(
+    document_text,
+    organization_id=1,
+)
 
-result = review_document(document)
+print("\n==============================")
+print("CLAUSEGUARD REVIEW RESULT")
+print("==============================")
 
-print("\n--- REVIEW RESULT ---")
-print("Status:", result["status"])
-print("Explanation:", result["explanation"])
-print("Severity:", result["severity"])
-print("Recommended action:", result["recommended_action"])
+print(f"Status: {result['status']}")
+print(f"Severity: {result['severity']}")
+print(f"Explanation: {result['explanation']}")
+print(f"Recommended Action: {result['recommended_action']}")
 
-print("\n--- SOURCES ---")
+print("\nSources:")
+
 for source in result["sources"]:
-    print(f"Source: {source['source']}")
-    print(f"Similarity score: {source['score']}")
+    print(
+        f"- {source['source']} "
+        f"(score: {source['score']})"
+    )

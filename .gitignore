@@ -1,6 +1,22 @@
+
+# Python
 .venv/
 __pycache__/
-*.pyc
-.env
+*.py[cod]
 *.log
+.pytest_cache/
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# Frontend dependencies and builds
+node_modules/
+dist/
+
+# Local vector database
 .qdrant/
+
+# Uploaded documents and runtime data
+backend/uploads/

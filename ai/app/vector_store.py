@@ -1,5 +1,12 @@
 from qdrant_client import QdrantClient
-from qdrant_client.models import Distance, VectorParams
+from qdrant_client.models import (
+    Distance,
+    VectorParams,
+    PointStruct,
+    Filter,
+    FieldCondition,
+    MatchValue,
+)
 
 
 QDRANT_URL = "http://localhost:6333"
@@ -20,27 +27,64 @@ def create_collection():
                 distance=Distance.COSINE,
             ),
         )
+
         print(f"Collection '{COLLECTION_NAME}' created.")
+
     else:
         print(f"Collection '{COLLECTION_NAME}' already exists.")
 
-from qdrant_client.models import PointStruct
+
+def delete_policy_chunks(policy_id: int):
+    """Remove all existing Qdrant chunks belonging to a policy."""
+
+    if not client.collection_exists(COLLECTION_NAME):
+        return
+
+    client.delete(
+        collection_name=COLLECTION_NAME,
+        points_selector=Filter(
+            must=[
+                FieldCondition(
+                    key="policy_id",
+                    match=MatchValue(value=policy_id),
+                )
+            ]
+        ),
+    )
+
+    print(f"Removed existing chunks for policy {policy_id}.")
 
 
-def add_chunks(chunks: list[str], embeddings: list[list[float]], source: str):
-    """Store policy chunks and their embeddings in Qdrant."""
+def add_chunks(
+    chunks: list[str],
+    embeddings: list[list[float]],
+    source: str,
+    policy_id: int,
+):
+    """
+    Store policy chunks and their embeddings in Qdrant.
+
+    Existing chunks for the same policy are removed first
+    so that re-indexing never leaves stale chunks behind.
+    """
+
+    # Remove any previous indexing for this policy.
+    delete_policy_chunks(policy_id)
 
     points = []
 
-    for i, (chunk, embedding) in enumerate(zip(chunks, embeddings)):
+    for i, (chunk, embedding) in enumerate(
+        zip(chunks, embeddings)
+    ):
         points.append(
             PointStruct(
-                id=i,
+                id=(policy_id * 1000000) + i,
                 vector=embedding,
                 payload={
                     "text": chunk,
                     "source": source,
                     "document_type": "policy",
+                    "policy_id": policy_id,
                 },
             )
         )
@@ -50,4 +94,7 @@ def add_chunks(chunks: list[str], embeddings: list[list[float]], source: str):
         points=points,
     )
 
-    print(f"Stored {len(points)} chunks in Qdrant.")
+    print(
+        f"Stored {len(points)} chunks for policy "
+        f"{policy_id} in Qdrant."
+    )
