@@ -20,3 +20,6 @@ dist/
 
 # Uploaded documents and runtime data
 backend/uploads/
+
+# Local Python deployment environment
+.venv311/
